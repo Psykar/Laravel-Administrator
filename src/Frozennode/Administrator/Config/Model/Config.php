@@ -334,7 +334,15 @@ class Config extends ConfigBase implements ConfigInterface {
 		if (is_string($validation)) return $validation;
 
 		//save the model
-		$model->save();
+		if (isset($model->updateUniques)) {
+			if (!$model->updateUniques()) {
+				throw new Exception("Could not save");
+			}
+		} else {
+			if (!$model->save()) {
+				throw new Exception("Could not save");
+			}
+		}
 
 		//save the relationships
 		$this->saveRelationships($input, $model, $fields);
