@@ -334,13 +334,13 @@ class Config extends ConfigBase implements ConfigInterface {
 		if (is_string($validation)) return $validation;
 
 		//save the model
-		if (isset($model->updateUniques)) {
+		try {
 			if (!$model->updateUniques()) {
-				throw new Exception("Could not save");
+				return $model->errors();
 			}
-		} else {
+		} catch (\BadMethodCallException $e) {
 			if (!$model->save()) {
-				throw new Exception("Could not save");
+				return $model->errors();
 			}
 		}
 

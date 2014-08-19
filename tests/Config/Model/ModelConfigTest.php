@@ -253,7 +253,8 @@ class ModelConfigTest extends \PHPUnit_Framework_TestCase {
 		$model = m::mock('stdClass')->makePartial();
 		$model->exists = false;
 		$model->shouldReceive('find')->once()
-				->shouldReceive('save')->once();
+				->shouldReceive('updateUniques')->once()->andThrow("BadMethodCallException", "stuff")
+				->shouldReceive('save')->once()->andReturn(true);
 		$input = m::mock('Illuminate\Http\Request');
 		$fields = array();
 		$actionPermissions = array('update' => true, 'create' => true);
@@ -263,6 +264,24 @@ class ModelConfigTest extends \PHPUnit_Framework_TestCase {
 						->shouldReceive('validateData')->once()
 						->shouldReceive('saveRelationships')->once()
 						->shouldReceive('setDataModel')->once();
+		$this->assertTrue($this->config->save($input, $fields, $actionPermissions));
+	}
+
+	public function testSaveValidatesUnique()
+	{
+		$model = m::mock('stdClass')->makePartial();
+		$model->exists = false;
+		$model->shouldReceive('find')->once()
+			->shouldReceive('updateUniques')->once()->andReturn(true);
+		$input = m::mock('Illuminate\Http\Request');
+		$fields = array();
+		$actionPermissions = array('update' => true, 'create' => true);
+		$this->config->shouldReceive('getDataModel')->twice()->andReturn($model)
+			->shouldReceive('fillModel')->once()
+			->shouldReceive('prepareDataAndRules')->once()->andReturn(array('data' => array(), 'rules' => array()))
+			->shouldReceive('validateData')->once()
+			->shouldReceive('saveRelationships')->once()
+			->shouldReceive('setDataModel')->once();
 		$this->assertTrue($this->config->save($input, $fields, $actionPermissions));
 	}
 
